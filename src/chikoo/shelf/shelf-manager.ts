@@ -1,13 +1,13 @@
 import { v4 as uuid } from 'uuid';
 import * as _ from'lodash';
 
-export interface StorageData {
+export interface ShelfData {
     key: string,
     current: any,
     previous: any
 }
 
-export type EventHandler = (data: StorageData) => void;
+export type EventHandler = (data: ShelfData) => void;
 
 export interface EventSubscription {
     subscriptionId: string,
@@ -20,36 +20,48 @@ export interface Subscription {
 }
 
 export type SubscriptionData = {
-    data: StorageData,
+    data: ShelfData,
     subscriptions: Map<string, EventSubscription>
 }
 
-export default class StorageManager {
+export const setShelf = (key: string, newData: any) => {
+    ShelfManager.setShelf(key, newData);
+}
 
-    private static storage: Map<string, SubscriptionData> = new Map();
+export const subscribe = (key: string, newEventHandler: EventHandler, triggerNow = false): Subscription => {
+    return ShelfManager.subscribe(key, newEventHandler, triggerNow);
+}
 
-    static setStore(key: string, newData: any) {
+export const getData = (key: string): any => {
+    return ShelfManager.getData(key);
+}
+
+class ShelfManager {
+
+    private static shelf: Map<string, SubscriptionData> = new Map();
+
+    static setShelf(key: string, newData: any) {
         if (key) {
-            let store = this.storage.get(key);
+            let shelf = this.shelf.get(key);
             const newDataClone = _.cloneDeep(newData);
-            if (store) {
-                store.data.previous = _.cloneDeep(store.data.current);
-                store.data.current = newDataClone;
+            if (shelf) {
+                shelf.data.previous = _.cloneDeep(shelf.data.current);
+                shelf.data.current = newDataClone;
             } else {
-                store = {
+                shelf = {
                     data: {
                         key, current: newDataClone,
                         previous: null
                     },
                     subscriptions: new Map()
                 };
-                this.storage.set(key, store);
+                this.shelf.set(key, shelf);
             }            
 
-            store.subscriptions.forEach((eventSub: EventSubscription, key: string) => {
+            shelf.subscriptions.forEach((eventSub: EventSubscription) => {
                 if (eventSub) {
-                    if (store) {
-                        eventSub.eventHandler(newDataClone);
+                    if (shelf) {
+                        eventSub.eventHandler(shelf.data);
                     }
                 }
             });
@@ -59,7 +71,7 @@ export default class StorageManager {
     static subscribe(key: string, newEventHandler: EventHandler, triggerNow = false): Subscription {
         const id = uuid();
         if (key && newEventHandler) {
-            const subscriptionData = this.storage.get(key);
+            const subscriptionData = this.shelf.get(key);
             if (subscriptionData) {
                 subscriptionData.subscriptions.set(id, { subscriptionId: id, eventHandler: newEventHandler });
 
@@ -68,6 +80,16 @@ export default class StorageManager {
                         newEventHandler(_.cloneDeep(subscriptionData.data));
                     }
                 }
+            } else {
+                const subsData: SubscriptionData = {
+                    data: {
+                        key, current: null,
+                        previous: null
+                    },
+                    subscriptions: new Map()
+                };
+                subsData.subscriptions.set(id, {subscriptionId: id, eventHandler: newEventHandler});
+                this.shelf.set(key, subsData);
             }
         }
 
@@ -75,12 +97,12 @@ export default class StorageManager {
     }
 
     static getData(key: string): any {
-        const subsData = this.storage.get(key);
+        const subsData = this.shelf.get(key);
         return subsData ? { ...subsData.data } : null;
     }
 
     static unsubscribe(key: string, id: string): boolean {
-        const subsData = this.storage.get(key);
+        const subsData = this.shelf.get(key);
         return subsData ? subsData.subscriptions.delete(id) : false;
     }
 }

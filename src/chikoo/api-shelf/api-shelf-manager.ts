@@ -5,20 +5,20 @@ import {
     EventSubscription,
     EventHandler,
     Subscription
-} from '../store/store-manager';
+} from '../shelf/shelf-manager';
 
 export default class ApiStoreManager {
 
-    private static storage: Map<string, SubscriptionData> = new Map();
+    private static shelf: Map<string, SubscriptionData> = new Map();
 
-    static setStore(key: string, url: string, headers?: { [key: string]: string }) {
+    static setShelf(key: string, url: string, headers?: { [key: string]: string }) {
         if (key && url) {
             fetch(url, { method: 'GET', headers })
                 .then((response: Response) => {
                     response
                         .json()
                         .then((data: any) => {
-                            let store = this.storage.get(key);
+                            let store = this.shelf.get(key);
                             if (store) {
                                 store.data.previous = _.cloneDeep(store.data.current);
                                 store.data.current = data;
@@ -30,7 +30,7 @@ export default class ApiStoreManager {
                                     },
                                     subscriptions: new Map()
                                 };
-                                this.storage.set(key, store);
+                                this.shelf.set(key, store);
                             }
 
                             store.subscriptions.forEach((eventSub: EventSubscription, key: string) => {
@@ -50,7 +50,7 @@ export default class ApiStoreManager {
     static subscribe(key: string, newEventHandler: EventHandler, triggerNow = false): Subscription {
         const id = uuid();
         if (key && newEventHandler) {
-            const subscriptionData = this.storage.get(key);
+            const subscriptionData = this.shelf.get(key);
             if (subscriptionData) {
                 subscriptionData.subscriptions.set(id, { subscriptionId: id, eventHandler: newEventHandler });
 
@@ -66,12 +66,12 @@ export default class ApiStoreManager {
     }
 
     static getData(key: string): any {
-        const subsData = this.storage.get(key);
+        const subsData = this.shelf.get(key);
         return subsData ? { ...subsData.data } : null;
     }
 
     static unsubscribe(key: string, id: string): boolean {
-        const subsData = this.storage.get(key);
+        const subsData = this.shelf.get(key);
         return subsData ? subsData.subscriptions.delete(id) : false;
     }
 }

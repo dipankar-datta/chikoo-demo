@@ -1,9 +1,17 @@
-import React from 'react';
+import React, { Component } from 'react';
+import Levels from './levels/levels';
+import Rows from './rows/rows';
 
-function App() {
-  return (
-    <div>Hello Chikoo</div>
-  );
+export default class App extends Component {
+
+  render() {
+    return (
+      <div style={{display: 'table', margin: 'auto'}}>
+        <h2>Chikoo Demo</h2>      
+        <Rows/>
+        <br/>
+        <Levels/>
+      </div>      
+    );
+  }
 }
-
-export default App;
