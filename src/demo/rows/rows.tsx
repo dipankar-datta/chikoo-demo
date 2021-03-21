@@ -34,7 +34,9 @@ export default class Rows extends Component<any, IRowsState> {
 
 
     componentWillUnmount() {
-        this.subscription?.unsubscribe();
+        if (this.subscription) {
+            this.subscription.unsubscribe();
+        }
     }
 
     render() {
@@ -45,14 +47,14 @@ export default class Rows extends Component<any, IRowsState> {
         };
         return (
             <div>
-                <h3>This is Rows Example</h3>
+                <label style={{fontWeight: 'bold'}}>Rows Example</label><br/>
                 <label style={{fontWeight: 'bold'}}>Target data: </label>{this.state.text}
                 <table>
                     <tbody>
                         <tr>
-                            {['One', 'Two', 'Three'].map((item: string) => {
+                            {['One', 'Two', 'Three'].map((item: string, index: number) => {
                                 return (
-                                    <td style={tdStyle}>
+                                    <td style={tdStyle} key={index}>
                                         <label style={{fontWeight: 'bold'}}>{item}</label>
                                         <Updater {...updateProps}/>
                                     </td>

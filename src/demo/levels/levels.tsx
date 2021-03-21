@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { setShelf, ShelfData, subscribe, Subscription, SubscriptionData } from '../../jatayu';
+import { setShelf, ShelfData, subscribe, Subscription } from '../../jatayu';
 import '../App.css';
 import Updater from '../updater/updater';
 
@@ -17,9 +17,15 @@ export default class Levels extends Component<any, any> {
     componentDidMount() {
         setShelf(TARGET_LEVEL_KEY, 'Initial Level');
         if (!this.subscription) {
-            subscribe(TARGET_LEVEL_KEY, (data: ShelfData) => { 
+            this.subscription = subscribe(TARGET_LEVEL_KEY, (data: ShelfData) => { 
                 this.setState({text: data.current});
             }, true);
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.subscription) {
+            this.subscription.unsubscribe();
         }
     }
 

@@ -1,56 +1,84 @@
 import { v4 as uuid } from 'uuid';
 import * as _ from 'lodash';
 import {
-    SubscriptionData,
     EventSubscription,
     EventHandler,
-    Subscription
+    ShelfData
 } from '../shelf/shelf-manager';
+
+export type ApiSubscriptionData = {
+    data: ShelfData,
+    url: string,
+    headers: any,
+    subscriptions: Map<string, EventSubscription>
+}
+
+export interface ApiShelfSubscription {
+    id: string;
+    unsubscribeApiShelf: () => void;
+}
+
+export const setApiShelf = async (key: string, url: string, headers?: { [key: string]: string })  => {
+    ApiStoreManager.setApiShelf(key, url, headers);
+}
+
+export const subscribeApiShelf = (key: string, newEventHandler: EventHandler, triggerNow = false): ApiShelfSubscription => {
+    return ApiStoreManager.subscribeApiShelf(key, newEventHandler, triggerNow);
+}
 
 export default class ApiStoreManager {
 
-    private static shelf: Map<string, SubscriptionData> = new Map();
+    private static apiShelf: Map<string, ApiSubscriptionData> = new Map();
 
-    static setShelf(key: string, url: string, headers?: { [key: string]: string }) {
+    static setApiShelf(key: string, url: string, headers?: { [key: string]: string }) {        
+        this.loadApiData(key, url, headers);
+    }
+
+    private static loadApiData(key: string, url: string, headers?: { [key: string]: string }) {
         if (key && url) {
             fetch(url, { method: 'GET', headers })
                 .then((response: Response) => {
                     response
                         .json()
                         .then((data: any) => {
-                            let store = this.shelf.get(key);
-                            if (store) {
-                                store.data.previous = _.cloneDeep(store.data.current);
-                                store.data.current = data;
+                            let shelf = this.apiShelf.get(key);
+                            if (shelf) {
+                                shelf.data.previous = _.cloneDeep(shelf.data.current);
+                                shelf.data.current = data;
+                                if (!shelf.url) {
+                                    shelf.url = url;
+                                }
+                                
                             } else {
-                                store = {
+                                shelf = {
                                     data: {
-                                        key, current: data,
+                                        key, 
+                                        current: data,
                                         previous: null
                                     },
+                                    headers,
+                                    url,
                                     subscriptions: new Map()
                                 };
-                                this.shelf.set(key, store);
+                                this.apiShelf.set(key, shelf);
                             }
 
-                            store.subscriptions.forEach((eventSub: EventSubscription, key: string) => {
+                            shelf.subscriptions.forEach((eventSub: EventSubscription, key: string) => {
                                 if (eventSub) {
-                                    if (store) {
-                                        eventSub.eventHandler(data);
+                                    if (shelf) {
+                                        eventSub.eventHandler(shelf.data);
                                     }
                                 }
                             });
-                        })
-                        .catch(console.error);
-                })
-                .catch(console.error);
+                        });
+                });
         }
     }
 
-    static subscribe(key: string, newEventHandler: EventHandler, triggerNow = false): Subscription {
+    static subscribeApiShelf(key: string, newEventHandler: EventHandler, triggerNow = false): ApiShelfSubscription {
         const id = uuid();
         if (key && newEventHandler) {
-            const subscriptionData = this.shelf.get(key);
+            const subscriptionData = this.apiShelf.get(key);
             if (subscriptionData) {
                 subscriptionData.subscriptions.set(id, { subscriptionId: id, eventHandler: newEventHandler });
 
@@ -59,19 +87,27 @@ export default class ApiStoreManager {
                         newEventHandler(_.cloneDeep(subscriptionData.data));
                     }
                 }
+            } else {
+                const subsData: ApiSubscriptionData = {
+                    data: {current: null, previous: null, key},
+                    url: '',
+                    headers: {},
+                    subscriptions: new Map().set(id, {subscriptionId: id, eventHandler: newEventHandler})
+                }
+                this.apiShelf.set(key, subsData);
             }
         }
 
-        return { id, unsubscribe: () => this.unsubscribe(key, id) };
+        return { id, unsubscribeApiShelf: () => this.unsubscribeApiShelf(key, id) };
     }
 
-    static getData(key: string): any {
-        const subsData = this.shelf.get(key);
+    static getApiShelfData(key: string): any {
+        const subsData = this.apiShelf.get(key);
         return subsData ? { ...subsData.data } : null;
     }
 
-    static unsubscribe(key: string, id: string): boolean {
-        const subsData = this.shelf.get(key);
+    static unsubscribeApiShelf(key: string, id: string): boolean {
+        const subsData = this.apiShelf.get(key);
         return subsData ? subsData.subscriptions.delete(id) : false;
     }
 }

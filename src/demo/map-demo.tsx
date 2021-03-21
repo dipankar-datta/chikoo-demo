@@ -39,7 +39,7 @@ export class MapDemo extends Component<any, IMapDemoState> {
     render() {       
         return (
             <div>
-                <label>Main Map Data: </label> {this.state.displayData}
+                <label style={{fontWeight: 'bold'}}>Main Map Data: </label> {this.state.displayData}
                 <br/><br/>
                 <div><MapUpdater/></div>
                 <br/><br/>
@@ -105,7 +105,7 @@ export class MapUpdater extends Component<any, IMapUpdaterState> {
     render() {
         return (
             <div style={{border: '1px solid red', padding: '10px'}}>
-                <label>Map Data: </label> {this.state.displayData}
+                <label style={{fontWeight: 'bold'}}>Map Data: </label> {this.state.displayData}
                 <br/><br/>
                 <label>Key: </label><input onChange={this.keyChangeHandler} name='key' type="text"/>&nbsp;&nbsp;
                 <label>Value: </label><input onChange={this.valueChangeHandler} name='value' type="text"/>

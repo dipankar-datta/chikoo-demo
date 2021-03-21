@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
-import Levels from './levels/levels';
+import ApiShelfDemo from './api-shelf-demo';
 import { MapDemo } from './map-demo';
-import Rows from './rows/rows';
+import ShelfDemo from './shelf-demo';
 
 interface IAppState {
-  category: 'shelf' | 'map';
+  category: 'shelf' | 'map' | 'apishelf';
 }
 
-export default class App extends Component<any, any> {
+export default class App extends Component<any, IAppState> {
 
   constructor(props: any) {
     super(props);
@@ -18,28 +18,46 @@ export default class App extends Component<any, any> {
     this.setState({category: ev.target.value});
   }
 
+  loadComponent = () => {
+    switch(this.state.category) {
+      case 'shelf' : return <ShelfDemo/>;
+      case 'map' : return <MapDemo/>;
+      case 'apishelf' : return <ApiShelfDemo/>;
+      default: return <></>;
+    }
+  }
+
+  loadRadioButtons = () => {
+    const options = [
+      {name: 'shelf', desc: 'Shelf'},
+      {name: 'map', desc: 'Map'},
+      {name: 'apishelf', desc: 'Api Shelf'},
+    ];
+
+    return options.map((item, index) => {
+      return (
+      <span key={index}>
+        <input 
+          name={item.name} 
+          onChange={this.onCategoryClickHandler} 
+          checked={this.state.category === item.name} 
+          value={item.name} type="radio"/> 
+        <label style={{paddingRight: '15px'}}>{item.desc}</label>
+      </span>
+      );
+    })
+  }
+
   render() {
-    return (
-      
-      <div style={{display: 'table', margin: 'auto'}}>
-        <h2>Chikoo Demo</h2> 
-         <input name='category' onClick={this.onCategoryClickHandler} checked={this.state.category === 'shelf'} value='shelf' type="radio"/> <label style={{paddingRight: '15px'}}>Shelf</label>
-        <input name='category' onClick={this.onCategoryClickHandler} checked={this.state.category === 'map'} value='map' type="radio"/> <label style={{paddingRight: '15px'}}>Map</label>
-        
-       
-        {this.state.category === 'shelf' ? 
-        (  
-          <div>   
-          <Rows/>
-          <br/>
-          <Levels/>
-          </div>  
-        )
-        :
-        (
-          <MapDemo/>
-        )
-      }
+    return (      
+      <div style={{display: 'table', margin: 'auto', width: '90%'}}>
+        <h2>Jatayu Demo</h2> 
+        <div>
+          {this.loadRadioButtons()}
+        </div>        
+        <div style={{padding: '20px'}}>
+          {this.loadComponent()}
+        </div>        
       </div>
     );
   }
