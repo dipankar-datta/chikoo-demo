@@ -28,7 +28,6 @@ export default class Updater extends Component<IUpdaterProps, IUpdaterState>{
     componentDidMount() {
         if (!this.subscription) {
             this.subscription = subscribe(this.props.shelfKey, (newData: ShelfData) => {
-                console.log('Data: ', newData);
                 this.setState({shelfText: newData.current});
             });
         }   
