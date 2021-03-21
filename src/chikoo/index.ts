@@ -1,1 +1,0 @@
-export * from './shelf/shelf-manager';

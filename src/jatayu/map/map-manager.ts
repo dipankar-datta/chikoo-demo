@@ -8,21 +8,41 @@ export interface MapData {
     map: Map<any, any>    
 }
 
-export type EventHandler = (data: MapData) => void;
+export type MapEventHandler = (data: MapData) => void;
 
 export interface MapEventSubscription {
     subscriptionId: string,
-    eventHandler: EventHandler
+    eventHandler: MapEventHandler
 }
 
 export interface MapSubscription {
     id: string;
-    unsubscribe: () => void;
+    unsubscribeMap: () => void;
 }
 
 export type MapSubscriptionData = {
     map: Map<any, any>,
     subscriptions: Map<string, MapEventSubscription>
+}
+
+export const setMap = (mapKey: string, objKey: any, newData: any)  => {
+    MapManager.setMap(mapKey, objKey, newData);
+}
+
+export const subscribeMap = (key: string, newEventHandler: MapEventHandler, triggerNow = false): MapSubscription => {
+    return MapManager.subscribe(key, newEventHandler, triggerNow);
+}
+
+export const getMap = (key: string): Map<any,any> | undefined => {
+    return MapManager.getMap(key);
+}
+
+export const clearMap = (key: string) => {
+    return MapManager.clearMap(key);
+}
+
+export const deleteMapEntry = (key: string, entryKey: string) => {
+    return MapManager.deleteMapEntry(key, entryKey);
 }
 
 class MapManager {
@@ -43,7 +63,7 @@ class MapManager {
                     subscriptions: new Map()
                 };
                 this.map.set(mapKey, subData);
-            }            
+            }
 
             subData.subscriptions.forEach((eventSub: MapEventSubscription) => {
                 if (eventSub) {
@@ -61,7 +81,7 @@ class MapManager {
         }
     }
 
-    static subscribe(key: string, newEventHandler: EventHandler, triggerNow = false): MapSubscription {
+    static subscribe(key: string, newEventHandler: MapEventHandler, triggerNow = false): MapSubscription {
         const id = uuid();
         if (key && newEventHandler) {
             const subscriptionData = this.map.get(key);
@@ -89,16 +109,38 @@ class MapManager {
             }
         }
 
-        return { id, unsubscribe: () => this.unsubscribe(key, id) };
+        return { id, unsubscribeMap: () => this.unsubscribeMap(key, id) };
     }
 
-    static getMap(key: string): any {
+    static getMap(key: string): Map<any,any> | undefined {
         const subsData = this.map.get(key);
-        return subsData ? { ...subsData.map } : null;
+        return subsData ? _.cloneDeep(subsData.map): undefined;
     }
 
-    static unsubscribe(key: string, id: string): boolean {
+    static unsubscribeMap(key: string, id: string): boolean {
         const subsData = this.map.get(key);
         return subsData ? subsData.subscriptions.delete(id) : false;
+    }
+
+    static deleteMapEntry(key: string, entryKey: string) {
+        const subsData: MapSubscriptionData | undefined = this.map.get(key);    
+        const deleted = subsData?.map.delete(entryKey);    
+        subsData?.subscriptions.forEach((eventSub: MapEventSubscription) => {
+            if (eventSub) {
+                    const eventData: MapData = {
+                        key: entryKey,
+                        current: null,
+                        previous:  _.cloneDeep(subsData.map.get(entryKey)),
+                        map: _.cloneDeep(subsData.map)
+                    }
+                    eventSub.eventHandler(eventData);
+                }
+            }
+        );
+        return deleted === true;
+    }
+
+    static clearMap(key: string) {
+        return this.map.delete(key);
     }
 }

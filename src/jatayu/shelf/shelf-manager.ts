@@ -98,7 +98,7 @@ class ShelfManager {
 
     static getData(key: string): any {
         const subsData = this.shelf.get(key);
-        return subsData ? { ...subsData.data } : null;
+        return subsData ?  _.cloneDeep(subsData.data) : null;
     }
 
     static unsubscribe(key: string, id: string): boolean {

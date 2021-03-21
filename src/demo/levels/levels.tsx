@@ -1,8 +1,7 @@
-import { divide } from 'lodash';
 import React, {Component} from 'react';
-import { setShelf, ShelfData, subscribe, Subscription, SubscriptionData } from '../../chikoo';
+import { setShelf, ShelfData, subscribe, Subscription, SubscriptionData } from '../../jatayu';
 import '../App.css';
-import Updater from '../updater';
+import Updater from '../updater/updater';
 
 export const TARGET_LEVEL_KEY = 'TARGET_LEVEL_KEY';
 

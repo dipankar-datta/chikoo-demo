@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
-import { getData, setShelf, ShelfData, subscribe, Subscription } from '../../chikoo/shelf/shelf-manager';
-import Updater from '../updater';
+import { getData, setShelf, ShelfData, subscribe, Subscription } from '../../jatayu/shelf/shelf-manager';
+import Updater from '../updater/updater';
 
 export const TARGET_ROW_KEY = 'TARGET_KEY';
 

@@ -1,5 +1,5 @@
 import {Component} from 'react';
-import { setShelf, ShelfData, subscribe, Subscription } from '../chikoo';
+import { setShelf, ShelfData, subscribe, Subscription } from '../../jatayu';
 
 interface IUpdaterState {
     shelfText: string,
