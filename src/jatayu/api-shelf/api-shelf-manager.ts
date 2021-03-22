@@ -47,8 +47,7 @@ export default class ApiStoreManager {
                                 shelf.data.current = data;
                                 if (!shelf.url) {
                                     shelf.url = url;
-                                }
-                                
+                                }                                
                             } else {
                                 shelf = {
                                     data: {
@@ -103,7 +102,7 @@ export default class ApiStoreManager {
 
     static getApiShelfData(key: string): any {
         const subsData = this.apiShelf.get(key);
-        return subsData ? { ...subsData.data } : null;
+        return subsData ? _.cloneDeep(subsData.data) : null;
     }
 
     static unsubscribeApiShelf(key: string, id: string): boolean {
