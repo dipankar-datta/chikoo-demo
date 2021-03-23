@@ -124,6 +124,7 @@ class MapManager {
 
     static deleteMapEntry(key: string, entryKey: string) {
         const subsData: MapSubscriptionData | undefined = this.map.get(key);    
+        const prevData = subsData?.map.get(entryKey);
         const deleted = subsData?.map.delete(entryKey);    
         if (deleted) {
             subsData?.subscriptions.forEach((eventSub: MapEventSubscription) => {
@@ -131,7 +132,7 @@ class MapManager {
                         const eventData: MapData = {
                             key: entryKey,
                             current: null,
-                            previous:  _.cloneDeep(subsData.map.get(entryKey)),
+                            previous:  prevData,
                             map: _.cloneDeep(subsData.map)
                         }
                         eventSub.eventHandler(eventData);
