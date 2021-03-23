@@ -125,18 +125,21 @@ class MapManager {
     static deleteMapEntry(key: string, entryKey: string) {
         const subsData: MapSubscriptionData | undefined = this.map.get(key);    
         const deleted = subsData?.map.delete(entryKey);    
-        subsData?.subscriptions.forEach((eventSub: MapEventSubscription) => {
-            if (eventSub) {
-                    const eventData: MapData = {
-                        key: entryKey,
-                        current: null,
-                        previous:  _.cloneDeep(subsData.map.get(entryKey)),
-                        map: _.cloneDeep(subsData.map)
+        if (deleted) {
+            subsData?.subscriptions.forEach((eventSub: MapEventSubscription) => {
+                if (eventSub) {
+                        const eventData: MapData = {
+                            key: entryKey,
+                            current: null,
+                            previous:  _.cloneDeep(subsData.map.get(entryKey)),
+                            map: _.cloneDeep(subsData.map)
+                        }
+                        eventSub.eventHandler(eventData);
                     }
-                    eventSub.eventHandler(eventData);
                 }
-            }
-        );
+            );
+        }
+        
         return deleted === true;
     }
 

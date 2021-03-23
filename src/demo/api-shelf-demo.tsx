@@ -46,8 +46,9 @@ class ApiTable extends Component<any, IApiShelfDemoState> {
     }
 
     componentDidMount() {
-        if (this.subscription) {
+        if (!this.subscription) {
             this.subscription = subscribeApiShelf(API_SHELF_KEY, (shelfData: ShelfData) => {
+                console.log('API Shelf data: ', shelfData);
                 this.setState({data: shelfData.current ? shelfData.current : []});
             }); 
         }  

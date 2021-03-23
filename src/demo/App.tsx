@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import ApiShelfDemo from './api-shelf-demo';
+import { ListDemo } from './list-demo';
 import { MapDemo } from './map-demo';
 import ShelfDemo from './shelf-demo';
 
 interface IAppState {
-  category: 'shelf' | 'map' | 'apishelf';
+  category: 'shelf' | 'map' | 'apishelf' | 'list';
 }
 
 export default class App extends Component<any, IAppState> {
@@ -23,6 +24,7 @@ export default class App extends Component<any, IAppState> {
       case 'shelf' : return <ShelfDemo/>;
       case 'map' : return <MapDemo/>;
       case 'apishelf' : return <ApiShelfDemo/>;
+      case 'list' : return <ListDemo/>;
       default: return <></>;
     }
   }
@@ -32,6 +34,7 @@ export default class App extends Component<any, IAppState> {
       {name: 'shelf', desc: 'Shelf'},
       {name: 'map', desc: 'Map'},
       {name: 'apishelf', desc: 'Api Shelf'},
+      {name: 'list', desc: 'List'}
     ];
 
     return options.map((item, index) => {

@@ -53,7 +53,7 @@ export default class Updater extends Component<IUpdaterProps, IUpdaterState>{
 
     render() {
         return (
-            <div>
+            <div style={{border: '1px solid red', padding: '15px'}}>
                 <label>Store Value: </label>{this.state.shelfText}<br/>
                 <input onChange={this.inputChangeHandler} value={this.state.localText} type="text"/> &nbsp;&nbsp;
                 <button onClick={this.updateShelf} >Update</button> &nbsp;&nbsp;

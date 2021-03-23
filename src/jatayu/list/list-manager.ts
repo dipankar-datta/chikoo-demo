@@ -16,7 +16,7 @@ export interface ListEventSubscription {
 
 export interface ListSubscription {
     id: string;
-    unsubscribeMap: () => void;
+    unsubscribeList: () => void;
 }
 
 export type ListSubscriptionData = {
@@ -54,13 +54,16 @@ class ListManager {
             let dataAdded: any | any[];
             if (subData) {
                 if (Array.isArray(newData)) {
-                    dataAdded = newData.filter((item: any) => subData?.list.indexOf(item) === -1)
+                    dataAdded = newData.filter((item: any) => subData?.list.indexOf(item) === -1);
                     subData.list = subData.list.concat(dataAdded);
                 } else {
-                    dataAdded = subData.list.find(item => item === newData);
-                    if (dataAdded) {
-                        subData.list.push(dataAdded);
-                    }                    
+                    dataAdded = subData.list.find(item => _.isEqual(item, newData));
+                    if (!dataAdded) {
+                        subData.list.push(newData);
+                        dataAdded = newData;
+                    } else {
+                        dataAdded = null;
+                    }                
                 }                
             } else {
                 subData = {
@@ -70,18 +73,20 @@ class ListManager {
                 this.map.set(listKey, subData);
             }
 
-            subData.subscriptions.forEach((eventSub: ListEventSubscription) => {
-                if (eventSub) {
-                    if (subData) {
-                        const eventData: ListData = {
-                            removed: null,
-                            added:  dataAdded,
-                            list: _.cloneDeep(subData.list)
+            if (dataAdded) {
+                subData.subscriptions.forEach((eventSub: ListEventSubscription) => {
+                    if (eventSub) {
+                        if (subData) {
+                            const eventData: ListData = {
+                                removed: null,
+                                added:  dataAdded,
+                                list: _.cloneDeep(subData.list)
+                            }
+                            eventSub.eventHandler(eventData);
                         }
-                        eventSub.eventHandler(eventData);
                     }
-                }
-            });
+                });
+            }            
         }
     }
 
@@ -96,24 +101,26 @@ class ListManager {
                 }
                 
             } else {
-                toDelete = delData.find((item: any) => delData === item);
+                toDelete = subsData.list.find((item: any) => _.isEqual(delData, item));
                 if (toDelete) {
-                    subsData.list = subsData.list.filter(item => item !== toDelete);
+                    subsData.list = subsData.list.filter(item => !_.isEqual(item, toDelete));
                 }
             }
 
-            subsData.subscriptions.forEach((eventSub: ListEventSubscription) => {
-                if (eventSub) {
-                    if (subsData) {
-                        const eventData: ListData = {
-                            removed: Array.isArray(toDelete) ? toDelete : [toDelete],
-                            added:  null,
-                            list: _.cloneDeep(subsData.list)
+            if (toDelete) {
+                subsData.subscriptions.forEach((eventSub: ListEventSubscription) => {
+                    if (eventSub) {
+                        if (subsData) {
+                            const eventData: ListData = {
+                                removed: Array.isArray(toDelete) ? toDelete : [toDelete],
+                                added:  null,
+                                list: _.cloneDeep(subsData.list)
+                            }
+                            eventSub.eventHandler(eventData);
                         }
-                        eventSub.eventHandler(eventData);
                     }
-                }
-            });
+                });
+            }
         }
     }
 
@@ -143,7 +150,7 @@ class ListManager {
             }
         }
 
-        return { id, unsubscribeMap: () => this.unsubscribeMap(key, id) };
+        return { id, unsubscribeList: () => this.unsubscribeMap(key, id) };
     }
 
     static getList(key: string): any[] | undefined {
