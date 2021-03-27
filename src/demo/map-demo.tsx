@@ -21,9 +21,7 @@ export class MapDemo extends Component<any, IMapDemoState> {
     componentDidMount() {        
         if (!this.mapSubs) {
             this.mapSubs = subscribeMap(MAP_TARGET_KEY, (mapData: MapData) => {
-                console.log('Data: ', mapData);
                 const displayData = JSON.stringify(mapToObject(mapData.map), null, 2);
-                console.log(displayData);
                 this.setState({displayData});
             });
         }
