@@ -68,7 +68,7 @@ export class MapUpdater extends Component<any, IMapUpdaterState> {
     componentDidMount() {
         if (!this.mapSubs) {
             this.mapSubs = subscribeMap(MAP_TARGET_KEY, (mapData: MapData) => {
-                console.log('MapUpdater: ', mapData);
+                console.log('Map Updated: ', mapData);
                 this.setState({displayData: JSON.stringify(mapToObject(mapData.map), null, 2)});               
             });
         }

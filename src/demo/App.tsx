@@ -1,11 +1,14 @@
 import React, { Component } from 'react';
 import ApiShelfDemo from './api-shelf-demo';
+import { LocalStorageDemo } from './local-storage-demo';
 import { MapDemo } from './map-demo';
+import { SessionStorageDemo } from './session-storage-demo';
 import { SetDemo } from './set-demo';
+import { InvokerDemo} from './invoker-demo';
 import ShelfDemo from './shelf-demo';
 
 interface IAppState {
-  category: 'shelf' | 'map' | 'apishelf' | 'set';
+  category: 'shelf' | 'map' | 'apishelf' | 'set' | 'local' | 'session' | 'invoker';
 }
 
 export default class App extends Component<any, IAppState> {
@@ -25,6 +28,9 @@ export default class App extends Component<any, IAppState> {
       case 'map' : return <MapDemo/>;
       case 'apishelf' : return <ApiShelfDemo/>;
       case 'set' : return <SetDemo/>;
+      case 'local' : return <LocalStorageDemo/>;
+      case 'session' : return <SessionStorageDemo/>;
+      case 'invoker' : return <InvokerDemo/>;
       default: return <></>;
     }
   }
@@ -34,7 +40,10 @@ export default class App extends Component<any, IAppState> {
       {name: 'shelf', desc: 'Shelf'},
       {name: 'map', desc: 'Map'},
       {name: 'apishelf', desc: 'Api Shelf'},
-      {name: 'set', desc: 'Set'}
+      {name: 'set', desc: 'Set'},
+      {name: 'local', desc: 'Local Storage'},
+      {name: 'session', desc: 'Session Storage'},
+      {name: 'invoker', desc: 'Invoker'}
     ];
 
     return options.map((item, index) => {
